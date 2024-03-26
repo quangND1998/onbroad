@@ -11,7 +11,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-
+use Shopify\Utils;
+use Shopify\Context;
 class InstalllAppController extends Controller
 {
     use CheckHmacTrait, ApiShopifyTrait;
@@ -40,20 +41,15 @@ class InstalllAppController extends Controller
                 if ($shop) {
                     $user = $this->getUserStore($request->shop);
                     //  Check have user
-
+                    
                     if ($user) {
                         // Check  access token 
                         $validAccessToken = $this->checkIfAccessTokenIsValid($user);
                         $is_embedded = determineIfAppIsEmbedded();
-                       
+                        
                         if ($validAccessToken) {
-                            if ($is_embedded) {
-                                $user = User::where('store_name', $request->shop)->first();
-                                // Auth::login($user);
-                                return redirect()->route('home');
-                            } else {
-                                return Redirect::route('login');
-                            }
+                            return redirect()->route('home', [$request->all()]);
+
                         } else {
                             $endpoint = 'https://' . $request->shop .
                                 '/admin/oauth/authorize?client_id=' . $this->api_key .
@@ -86,7 +82,7 @@ class InstalllAppController extends Controller
 
         try {
             $validRequest = $this->validateRequestShopify($request->all());
-
+          
             if ($validRequest) {
                 if ($request->has('shop') && $request->has('code')) {
                     $shop = $request->shop;
@@ -94,9 +90,11 @@ class InstalllAppController extends Controller
                     $accessToken = $this->getAccessTokenShopify($shop, $code);
                     if ($accessToken !== false && $accessToken !== null) {
                         $shopDetails = $this->getShopDetailsFromShopify($shop, $accessToken);
+                      
                         $user = $this->saveStoreDetailsToDatabase($shopDetails, $accessToken);
-
+                      
                         if ($user) {
+                            Auth::login($user);
                             return redirect()->route('home');
                         }
                     } else throw new Exception('Invalid Access Token ' . $accessToken);

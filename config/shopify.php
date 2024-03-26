@@ -5,6 +5,8 @@ return [
     'shopify_api_secret' => env('SHOPIFY_API_SECRET', 'cba83bb499368eceecd6e2d2722bfc9e'),
     'shopify_api_version' => '2022-07',
     'app_embedded' => env('APP_EMBEDDED', false),
+    'appbridge_enabled' => (bool) env('SHOPIFY_APPBRIDGE_ENABLED', true),
+    'appbridge_version' => env('SHOPIFY_APPBRIDGE_VERSION', 'latest'),
     'api_scopes' => [
         'write_orders',
         'write_fulfillments',
