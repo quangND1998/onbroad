@@ -29,7 +29,7 @@ class UpdateUser extends Controller
         }   
         catch(Exception $e){
             DB::rollBack();
-            return $e;
+            throw $e;
         }
     }
 }
